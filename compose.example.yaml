@@ -1,0 +1,20 @@
+# Minimal deployment: copy site/config.example.js to site/config.js,
+# adjust, set the environment values, then `docker compose up -d` and
+# put your TLS-terminating reverse proxy in front of :8080.
+services:
+  infoscreen:
+    image: caddy:2-alpine
+    container_name: infoscreen
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      - POLLENINFO_APIKEY=${POLLENINFO_APIKEY}
+      - INFOSCREEN_LAT=48.2083
+      - INFOSCREEN_LON=16.3731
+      # only needed with kumaEnabled: true in config.js
+      - INFOSCREEN_KUMA_UPSTREAM=localhost:65535
+      - INFOSCREEN_KUMA_SLUG=unused
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./site:/srv:ro

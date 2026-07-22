@@ -1,0 +1,51 @@
+# Internal server for the infoscreen. Terminate TLS in front of this
+# (any reverse proxy); this container serves the static page and proxies
+# the two APIs the browser can't call directly (Wiener Linien: no CORS;
+# polleninformation.at: needs an API key, kept server-side).
+#
+# Environment variables:
+#   POLLENINFO_APIKEY        polleninformation.at API key (free, see their
+#                            data-interface page)
+#   INFOSCREEN_LAT/LON       your coordinates for the pollen forecast
+#   INFOSCREEN_KUMA_UPSTREAM Uptime Kuma host:port     (optional)
+#   INFOSCREEN_KUMA_SLUG     Kuma status-page slug     (optional)
+
+:80 {
+	root * /srv
+	encode gzip
+
+	# Wiener Linien realtime: /api/wl/monitor?stopId=… → ogd_realtime/monitor.
+	# Host must be the bare hostname ({upstream_hostport} appends :443 and
+	# their CDN answers 429) and X-Forwarded-* must not leak upstream.
+	handle_path /api/wl/* {
+		rewrite * /ogd_realtime{path}
+		reverse_proxy https://www.wienerlinien.at {
+			header_up Host www.wienerlinien.at
+			header_up -X-Forwarded-For
+			header_up -X-Forwarded-Proto
+			header_up -X-Forwarded-Host
+		}
+	}
+
+	# Pollen forecast (API key injected server-side, never reaches the browser)
+	handle /api/pollen {
+		rewrite * /api/forecast/public?country=AT&lang=de&latitude={env.INFOSCREEN_LAT}&longitude={env.INFOSCREEN_LON}&apikey={env.POLLENINFO_APIKEY}
+		reverse_proxy https://www.polleninformation.at {
+			header_up Host www.polleninformation.at
+			header_up -X-Forwarded-For
+			header_up -X-Forwarded-Proto
+			header_up -X-Forwarded-Host
+		}
+	}
+
+	# Uptime Kuma status-page heartbeats (optional; set kumaEnabled in
+	# config.js — the page never calls this route when disabled)
+	handle /api/kuma {
+		rewrite * /api/status-page/heartbeat/{env.INFOSCREEN_KUMA_SLUG}
+		reverse_proxy {env.INFOSCREEN_KUMA_UPSTREAM}
+	}
+
+	handle {
+		file_server
+	}
+}
