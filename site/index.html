@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="google" content="notranslate">
+<title>Infoscreen</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text x='0' y='13' font-size='13'>🚇</text></svg>">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <aside class="col-left">
+    <section class="card clock-card">
+      <div class="clock" id="clock">--:--</div>
+      <div class="min-progress"><div id="min-bar"></div></div>
+      <div class="date" id="date"></div>
+      <div class="worldclocks">
+        <div class="wclock">
+          <span class="wc-label">LA</span><span class="wc-time" id="wc-la">--:--</span>
+          <span class="lala" id="lala" hidden>it's another day of sun ☀</span>
+        </div>
+      </div>
+      <div class="greet" id="greet"></div>
+    </section>
+
+    <section class="card weather-card">
+      <div class="weather-now">
+        <div class="now-icon" id="now-icon"></div>
+        <div class="now-temp" id="now-temp">--°</div>
+        <div class="uv" id="uv" hidden></div>
+      </div>
+    </section>
+
+    <section class="card aqi-card">
+      <div id="aqi" class="aqi"></div>
+    </section>
+
+    <section class="card pollen-card">
+      <div id="pollen" class="pollen"></div>
+    </section>
+  </aside>
+
+  <main class="col-right">
+    <section class="card transit-card">
+      <div id="alerts"></div>
+      <div id="transit" class="transit"></div>
+      <div id="bikes" class="bikes"></div>
+    </section>
+
+    <section class="card hourly-card">
+      <div class="hourly" id="hourly"></div>
+    </section>
+
+    <section class="card hourly-card">
+      <div class="daily-strip" id="daily"></div>
+    </section>
+  </main>
+
+  <div id="stale" class="stale" hidden></div>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
