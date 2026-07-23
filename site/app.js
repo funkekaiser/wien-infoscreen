@@ -224,8 +224,10 @@ function weatherLines(now) {
   const out = [];
   if (!WX) return out;
   if (WX.rainSoon >= 50) out.push("Schirm einpacken ☔");
-  if (WX.uv >= 6) out.push("UV " + Math.round(WX.uv) + " heute, Sonnencreme! 🧴");
-  else if (WX.uv >= 3 && now.getHours() < 12) out.push("Sonnencreme nicht vergessen 🧴");
+  if (WX.uvAhead >= 3) {
+    if (WX.uv >= 6) out.push("UV " + Math.round(WX.uv) + " heute, Sonnencreme! 🧴");
+    else if (now.getHours() < 12) out.push("Sonnencreme nicht vergessen 🧴");
+  }
   if (WX.tMax >= 34) out.push("Bis " + Math.round(WX.tMax) + "° heute, viel trinken! 🥵");
   else if (WX.tMax >= 30) out.push("Heiß heute: bis " + Math.round(WX.tMax) + "° 🌡️");
   if (WX.tMax <= 3) out.push("Kalt heute, warm anziehen! 🧣");
@@ -653,7 +655,7 @@ async function fetchWeather() {
     const url = "https://api.open-meteo.com/v1/forecast" +
       "?latitude=" + CONFIG.lat + "&longitude=" + CONFIG.lon +
       "&current=temperature_2m,weather_code,is_day" +
-      "&hourly=temperature_2m,weather_code,precipitation_probability,is_day" +
+      "&hourly=temperature_2m,weather_code,precipitation_probability,is_day,uv_index" +
       "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,uv_index_max" +
       "&forecast_days=13&timezone=Europe%2FVienna";
     const res = await fetch(url);
@@ -672,12 +674,22 @@ function renderWeather(d) {
   $("now-temp").textContent = Math.round(d.current.temperature_2m) + "°";
   $("now-temp").style.color = tempColor(d.current.temperature_2m);
 
+  const nowIso = d.current.time.slice(0, 13);          // "2026-07-22T16"
+  let start = d.hourly.time.findIndex((t) => t.slice(0, 13) === nowIso) + 1;
+  if (start <= 0) start = 1;
+
+  // Highest UV still ahead today (current hour included) — once the rest of
+  // the day stays under 3, sunscreen advice is moot, badge and all
+  const today = d.current.time.slice(0, 10);
+  let uvAhead = 0;
+  for (let i = start - 1; i < d.hourly.time.length && d.hourly.time[i].slice(0, 10) === today; i++)
+    uvAhead = Math.max(uvAhead, d.hourly.uv_index[i]);
+
   // UV badge — only when sunscreen is actually advised (WHO: UV >= 3)
-  const uv = d.daily.uv_index_max[0];
   const uvEl = $("uv");
-  if (uv >= 3) {
-    const uvColor = uv >= 11 ? "#c77dff" : uv >= 8 ? "#ff5050" : uv >= 6 ? "#ff9633" : "#f0e641";
-    uvEl.textContent = "UV " + Math.round(uv);
+  if (uvAhead >= 3) {
+    const uvColor = uvAhead >= 11 ? "#c77dff" : uvAhead >= 8 ? "#ff5050" : uvAhead >= 6 ? "#ff9633" : "#f0e641";
+    uvEl.textContent = "UV " + Math.round(uvAhead);
     uvEl.style.color = uvColor;
     uvEl.style.background = "color-mix(in srgb, " + uvColor + " 14%, var(--card-inset))";
     uvEl.hidden = false;
@@ -688,6 +700,7 @@ function renderWeather(d) {
   // Context for the greeting line
   WX = {
     uv: d.daily.uv_index_max[0],
+    uvAhead: uvAhead,
     tMax: d.daily.temperature_2m_max[0],
     tMaxTomorrow: d.daily.temperature_2m_max[1],
     rainSoon: 0,
@@ -695,9 +708,6 @@ function renderWeather(d) {
   lastGreetKey = "";   // re-pick with fresh context
 
   // Hourly: the next 12 hours from now
-  const nowIso = d.current.time.slice(0, 13);          // "2026-07-22T16"
-  let start = d.hourly.time.findIndex((t) => t.slice(0, 13) === nowIso) + 1;
-  if (start <= 0) start = 1;
   WX.rainSoon = Math.max(0, ...d.hourly.precipitation_probability.slice(start, start + 3));
   let hh = "";
   for (let i = start; i < Math.min(start + 12, d.hourly.time.length); i++) {
