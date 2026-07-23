@@ -343,8 +343,6 @@ body {
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
-/* right-align totals so the ones digits of 4 and 16 sit on one column */
-.bike-total { text-align: right; padding-right: 12px; }
 
 /* ── Hourly strip (next 12 h) ────────────────────────────────── */
 
