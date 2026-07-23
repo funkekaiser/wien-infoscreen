@@ -7,10 +7,11 @@
   --card-inset: #0e1420;
   --line: #202a3a;
   --ink: #e9edf3;
-  /* Muted tones kept ≥5:1 on --card — the kiosk TV crushes dark grays,
-     and the original #5d6878 sat at ~3.1:1 (below the 4.5:1 AA floor). */
-  --ink-2: #a7b1c2;
-  --ink-3: #8593a6;
+  /* Muted tones kept well above the 4.5:1 AA floor — the kiosk TV crushes
+     dark grays, and its upside-down panel washes out the lower half of the
+     screen on top of that (original #5d6878 sat at ~3.1:1). */
+  --ink-2: #b3bdcc;
+  --ink-3: #93a1b4;
   --good: #6fcf7c;
   --warn: #f2c94c;
   --bad: #eb5757;
@@ -361,9 +362,9 @@ body {
   position: relative;
   overflow: hidden;   /* keeps the rain bar inside the pill shape */
 }
-.hour .h-time { font-size: 17px; color: var(--ink-3); }
+.hour .h-time { font-size: 17px; color: var(--ink-2); }
 .hour .h-icon { font-size: 28px; margin: 6px 0; }
-.hour .h-temp { font-size: 21px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.hour .h-temp { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
 /* rain odds as a blue fill bar along the tile's bottom edge —
    width = probability, same visual language as the minute bar */
 .rain-bar {
@@ -391,10 +392,10 @@ body {
   position: relative;
   overflow: hidden;   /* keeps the rain bar inside the pill shape */
 }
-.dday .d-name { font-size: 17px; color: var(--ink-3); white-space: nowrap; }
+.dday .d-name { font-size: 17px; color: var(--ink-2); white-space: nowrap; }
 .dday .d-icon { font-size: 28px; margin: 6px 0; }
-.dday .d-max { font-size: 21px; font-weight: 600; font-variant-numeric: tabular-nums; }
-.dday .d-min { font-size: 17px; opacity: 0.75; font-variant-numeric: tabular-nums; }
+.dday .d-max { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.dday .d-min { font-size: 17px; font-variant-numeric: tabular-nums; }
 
 /* ── Air quality + pollen (left column) ──────────────────────── */
 

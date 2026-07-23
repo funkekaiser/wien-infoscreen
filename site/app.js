@@ -602,13 +602,15 @@ function wmo(code, isDay) {
 // blending would turn muddy between blue and yellow).
 const TEMP_STOPS = [
   [-10, [215, 90, 75]],  // icy blue
-  [0,   [205, 85, 68]],  // cold blue
-  [8,   [185, 65, 60]],  // cyan
-  [14,  [150, 50, 60]],  // teal-green
-  [20,  [95,  55, 62]],  // green
-  [25,  [48,  95, 62]],  // warm yellow
-  [30,  [28, 100, 62]],  // orange
-  [36,  [5,   95, 64]],  // red
+  // Lightness sits high (68–75) on purpose: the kiosk panel is mounted
+  // upside-down and washes out the lower half — subtler tones vanish there.
+  [0,   [205, 90, 75]],  // cold blue
+  [8,   [185, 70, 68]],  // cyan
+  [14,  [150, 55, 66]],  // teal-green
+  [20,  [95,  60, 68]],  // green
+  [25,  [48,  95, 66]],  // warm yellow
+  [30,  [28, 100, 68]],  // orange
+  [36,  [5,  100, 70]],  // red
 ];
 
 function tempColor(t) {
@@ -715,7 +717,7 @@ function renderWeather(d) {
     const prob = d.hourly.precipitation_probability[i];
     const temp = d.hourly.temperature_2m[i];
     hh += '<div class="hour" style="background:color-mix(in srgb, ' +
-      tempColor(temp) + ' 6%, var(--card-inset))">' +
+      tempColor(temp) + ' 14%, var(--card-inset))">' +
       '<div class="h-time">' + d.hourly.time[i].slice(11, 16) + "</div>" +
       '<div class="h-icon">' + hi + "</div>" +
       '<div class="h-temp" style="color:' + tempColor(temp) + '">' + Math.round(temp) + "°</div>" +
@@ -735,7 +737,7 @@ function renderWeather(d) {
     const rain = d.daily.precipitation_probability_max[i];
     const max = d.daily.temperature_2m_max[i];
     dd += '<div class="dday" style="background:color-mix(in srgb, ' +
-      tempColor(max) + ' 6%, var(--card-inset))">' +
+      tempColor(max) + ' 14%, var(--card-inset))">' +
       '<div class="d-name">' + name + "</div>" +
       '<div class="d-icon" title="' + dl + '">' + di + "</div>" +
       '<div class="d-max" style="color:' + tempColor(max) + '">' + Math.round(max) + "°</div>" +
