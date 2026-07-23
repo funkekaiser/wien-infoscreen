@@ -186,6 +186,7 @@ body {
   font-size: 0.92em;
 }
 .now-temp { font-size: 60px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
 .uv {
   font-size: 22px;
   font-weight: 700;
@@ -198,7 +199,7 @@ body {
 
 .col-right {
   display: grid;
-  grid-template-rows: 1fr auto auto;
+  grid-template-rows: 1fr auto auto auto;
   /* explicit minmax(0,1fr) column: the implicit auto track otherwise grows
      to the max-content of nowrap children (disruption banner text) */
   grid-template-columns: minmax(0, 1fr);
@@ -394,6 +395,23 @@ body {
 .dday .d-icon { font-size: 28px; margin: 6px 0; }
 .dday .d-max { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
 .dday .d-min { font-size: 17px; font-variant-numeric: tabular-nums; }
+
+/* ── Sun path (bottom strip): today's real elevation curve, colored
+   by sky phase — dawn/dusk are the purple-orange dips below the
+   horizon line, so twilight needs no timestamps of its own */
+
+.sun-card { padding: 12px 26px; overflow: hidden; }
+.sunpath svg { display: block; width: 100%; height: auto; }
+.sp-horizon { stroke: #26324a; stroke-width: 1; }
+.sp-moon { font-size: 18px; text-anchor: middle; }
+.sp-label {
+  font-size: 19px;
+  font-weight: 600;
+  fill: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+}
+.sp-arrow { font-size: 16px; font-weight: 400; fill: var(--ink-3); }
+.sp-drift { font-size: 16px; font-weight: 400; fill: var(--ink-3); }
 
 /* ── Air quality + pollen (left column) ──────────────────────── */
 

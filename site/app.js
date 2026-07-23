@@ -277,6 +277,7 @@ function tick() {
   $("date").textContent = fmtDate.format(now);
   $("wc-la").textContent = fmtLA.format(now);
   updateGreeting(now);
+  renderSunPath(now);
 
   // Daily reload at CONFIG.reloadHour:00 (guard so it fires once per minute-window)
   const stamp = now.toDateString() + now.getHours();
@@ -613,8 +614,8 @@ const TEMP_STOPS = [
   [36,  [5,  100, 70]],  // red
 ];
 
-function tempColor(t) {
-  const s = TEMP_STOPS;
+function rampColor(stops, t) {
+  const s = stops;
   if (t <= s[0][0]) return hsl(s[0][1]);
   if (t >= s[s.length - 1][0]) return hsl(s[s.length - 1][1]);
   for (let i = 1; i < s.length; i++) {
@@ -624,6 +625,8 @@ function tempColor(t) {
     }
   }
 }
+
+const tempColor = (t) => rampColor(TEMP_STOPS, t);
 
 function hsl(c) {
   return "hsl(" + Math.round(c[0]) + " " + Math.round(c[1]) + "% " + Math.round(c[2]) + "%)";
@@ -747,6 +750,161 @@ function renderWeather(d) {
       "</div>";
   }
   setStrip($("daily"), dd, d.daily.time[0], d.daily.time[1]);
+}
+
+/* ── Sun path (sunrise / sunset / twilight) ──────────────────── */
+
+/* NOAA solar-position arithmetic — the sun needs no API either.
+   Elevation good to ~0.1°, event times to ~1 min. */
+
+const RAD = Math.PI / 180;
+
+function solarBasis(d) {
+  // fractional year (radians) from the UTC day-of-year
+  const g = 2 * Math.PI / 365 *
+    ((d - Date.UTC(d.getUTCFullYear(), 0, 1)) / 864e5);
+  return {
+    // equation of time (minutes), declination (radians)
+    eqtime: 229.18 * (0.000075 + 0.001868 * Math.cos(g) - 0.032077 * Math.sin(g)
+      - 0.014615 * Math.cos(2 * g) - 0.040849 * Math.sin(2 * g)),
+    decl: 0.006918 - 0.399912 * Math.cos(g) + 0.070257 * Math.sin(g)
+      - 0.006758 * Math.cos(2 * g) + 0.000907 * Math.sin(2 * g)
+      - 0.002697 * Math.cos(3 * g) + 0.00148 * Math.sin(3 * g),
+  };
+}
+
+function sunElevation(d) {
+  const { eqtime, decl } = solarBasis(d);
+  const tst = d.getUTCHours() * 60 + d.getUTCMinutes() + d.getUTCSeconds() / 60 +
+    eqtime + 4 * CONFIG.lon;
+  const ha = (tst / 4 - 180) * RAD;
+  const lat = CONFIG.lat * RAD;
+  return Math.asin(Math.sin(lat) * Math.sin(decl) +
+    Math.cos(lat) * Math.cos(decl) * Math.cos(ha)) / RAD;
+}
+
+// The two instants the sun crosses `alt` degrees on the given calendar
+// day (-0.833 = sunrise/sunset incl. refraction, -6 = civil twilight) —
+// null beyond the polar circles.
+function sunCrossings(day, alt) {
+  const { eqtime, decl } = solarBasis(
+    new Date(Date.UTC(day.getFullYear(), day.getMonth(), day.getDate(), 12)));
+  const lat = CONFIG.lat * RAD;
+  const cosHa = (Math.sin(alt * RAD) - Math.sin(lat) * Math.sin(decl)) /
+    (Math.cos(lat) * Math.cos(decl));
+  if (Math.abs(cosHa) > 1) return null;
+  const haDeg = Math.acos(cosHa) / RAD;
+  const base = Date.UTC(day.getFullYear(), day.getMonth(), day.getDate());
+  return {
+    rise: new Date(base + (720 - 4 * (CONFIG.lon + haDeg) - eqtime) * 60000),
+    set: new Date(base + (720 - 4 * (CONFIG.lon - haDeg) - eqtime) * 60000),
+  };
+}
+
+// Sky color by sun elevation: night slate → civil-twilight purple →
+// horizon orange → golden hour → daylight. The curve wears these colors,
+// so dawn/dusk read as zones instead of four timestamps.
+// Hues climb monotonically past 360° (CSS wraps them) — interpolating
+// 335 → 20 directly would take the long way round, through green.
+const SUN_STOPS = [
+  // night lightness sits at 30, not lower: the strip lives in the kiosk
+  // panel's washed-out lower half, which crushes anything dimmer
+  [-12, [222, 25, 30]],  // night
+  [-6,  [258, 38, 42]],  // civil twilight starts: deep purple
+  [-2,  [335, 55, 55]],  // pink shoulder just under the horizon
+  [0,   [380, 85, 62]],  // horizon orange (380 = hue 20)
+  [7,   [398, 95, 66]],  // golden hour   (398 = hue 38)
+  [20,  [406, 92, 72]],
+  [66,  [412, 88, 80]],  // high summer sun
+];
+
+// ?at=2026-12-21T16:30 previews the sun path at another instant (design aid)
+const SUN_AT = new URLSearchParams(location.search).get("at");
+
+let lastSunKey = "";
+
+function renderSunPath(now) {
+  if (SUN_AT) now = new Date(SUN_AT);
+  const key = now.toDateString() + "|" + now.getHours() + ":" + now.getMinutes();
+  if (key === lastSunKey) return;
+  lastSunKey = key;
+
+  // wide horizon strip: x = the local day 00:00–24:00, y = elevation.
+  // Above the horizon the curve is to scale; below it the scale is
+  // stretched (~3×) so the twilight dip reads as a real zone, floored
+  // at -13° where the night runs flat.
+  const W = 1338, H = 72, HORIZON = 44, TOP = 8, FLOOR_DEG = -13;
+  const PAD = 6;
+  const upScale = (HORIZON - TOP) / 66;
+  const dnScale = 1.5;
+  const x = (min) => PAD + (min / 1440) * (W - 2 * PAD);
+  const y = (e) => e >= 0 ? HORIZON - e * upScale
+    : HORIZON - Math.max(e, FLOOR_DEG) * dnScale;
+  const base = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+
+  // path + gradient sampled across the local day
+  let path = "", stops = "";
+  for (let m = 0; m <= 1440; m += 10) {
+    const e = sunElevation(new Date(base + m * 60000));
+    path += (m ? "L" : "M") + x(m).toFixed(1) + " " + y(e).toFixed(1);
+    if (m % 20 === 0) {
+      stops += '<stop offset="' + (m / 1440 * 100).toFixed(1) + '%" stop-color="' +
+        rampColor(SUN_STOPS, e) + '"/>';
+    }
+  }
+
+  // current position: sun dot with a soft halo, or the moon at night
+  // (x clamped so the midnight moon isn't clipped by the svg edge)
+  const nowMin = now.getHours() * 60 + now.getMinutes();
+  const eNow = sunElevation(now);
+  const cx = Math.min(Math.max(x(nowMin), 15), W - 15).toFixed(1);
+  const cy = y(eNow).toFixed(1);
+  const marker = eNow < -6
+    ? '<text class="sp-moon" x="' + cx + '" y="' + (+cy + 6) + '">' +
+      moonPhaseEmoji(now) + "</text>"
+    : '<circle cx="' + cx + '" cy="' + cy + '" r="11" fill="' +
+      rampColor(SUN_STOPS, eNow) + '" opacity="0.25"/>' +
+      '<circle cx="' + cx + '" cy="' + cy + '" r="5.5" fill="' +
+      rampColor(SUN_STOPS, eNow) + '"/>';
+
+  // sunrise / sunset labels with the day-to-day drift in minutes,
+  // floating in the empty sky beside their horizon crossings
+  const fmtHM = (d) => String(d.getHours()).padStart(2, "0") + ":" +
+    String(d.getMinutes()).padStart(2, "0");
+  const minOfDay = (d) => d.getHours() * 60 + d.getMinutes();
+  const today = sunCrossings(now, -0.833);
+  const tomorrow = sunCrossings(new Date(base + 36 * 3600e3), -0.833);
+  let labels = "";
+  if (today && tomorrow) {
+    const label = (ev, arrow, anchor) => {
+      const drift = minOfDay(tomorrow[ev]) - minOfDay(today[ev]);
+      const lx = x(minOfDay(today[ev])) + (anchor === "end" ? -16 : 16);
+      return '<text class="sp-label" text-anchor="' + anchor + '" x="' +
+        lx.toFixed(0) + '" y="30"><tspan class="sp-arrow">' + arrow +
+        "</tspan> " + fmtHM(today[ev]) +
+        (drift ? '<tspan class="sp-drift"> ' +
+          (drift > 0 ? "+" : "−") + Math.abs(drift) + "′</tspan>" : "") +
+        "</text>";
+    };
+    labels = label("rise", "↑", "end") + label("set", "↓", "start");
+  }
+
+  $("sunpath").innerHTML =
+    '<svg viewBox="0 0 ' + W + " " + H + '">' +
+    '<defs><linearGradient id="sp-grad" gradientUnits="userSpaceOnUse" ' +
+    'x1="' + PAD + '" y1="0" x2="' + (W - PAD) + '" y2="0">' + stops +
+    "</linearGradient>" +
+    '<clipPath id="sp-sky"><rect x="0" y="0" width="' + W + '" height="' +
+    HORIZON + '"/></clipPath></defs>' +
+    '<line class="sp-horizon" x1="' + PAD + '" y1="' + HORIZON +
+    '" x2="' + (W - PAD) + '" y2="' + HORIZON + '"/>' +
+    // daylight as a faint warm area under the arc (clipped at the horizon)
+    '<path d="' + path + "L" + (W - PAD) + " " + HORIZON + "L" + PAD + " " +
+    HORIZON + 'Z" fill="url(#sp-grad)" opacity="0.08" clip-path="url(#sp-sky)"/>' +
+    '<path d="' + path + '" fill="none" stroke="url(#sp-grad)" ' +
+    'stroke-width="4" stroke-linecap="round"/>' +
+    marker + labels +
+    "</svg>";
 }
 
 /* ── Air quality (Open-Meteo, European AQI) ──────────────────── */
