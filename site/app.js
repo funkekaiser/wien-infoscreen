@@ -833,7 +833,7 @@ function renderSunPath(now) {
   // Above the horizon the curve is to scale; below it the scale is
   // stretched so the twilight dip stays visible, floored at -13° where
   // the night runs flat.
-  const W = 418, H = 58, HORIZON = 38, TOP = 8, FLOOR_DEG = -13;
+  const W = 418, H = 64, HORIZON = 38, TOP = 8, FLOOR_DEG = -13;
   const PAD = 4;
   const upScale = (HORIZON - TOP) / 66;
   const dnScale = 1.1;
@@ -887,6 +887,19 @@ function renderSunPath(now) {
         "</text>";
     };
     labels = label("rise", "↑", "start") + label("set", "↓", "end");
+  }
+
+  // civil-twilight length as a small number under each dip — the zone
+  // it measures sits right above it, so it needs no word
+  const civil = sunCrossings(now, -6);
+  if (today && civil) {
+    const dur = (ev) => {
+      const mins = Math.abs(Math.round((civil[ev] - today[ev]) / 60000));
+      const mid = (minOfDay(civil[ev]) + minOfDay(today[ev])) / 2;
+      return '<text class="sp-dur" text-anchor="middle" x="' +
+        x(mid).toFixed(0) + '" y="' + (H - 2) + '">' + mins + "′</text>";
+    };
+    labels += dur("rise") + dur("set");
   }
 
   $("sunpath").innerHTML =

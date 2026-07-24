@@ -70,7 +70,7 @@ body {
 /* the left column runs full: these three give the sun path its room */
 .weather-card { padding-top: 14px; padding-bottom: 14px; }
 .aqi-card { padding-top: 14px; padding-bottom: 14px; }
-.pollen-card { padding-top: 16px; padding-bottom: 16px; }
+.pollen-card { padding-top: 16px; padding-bottom: 14px; }
 
 .clock-card { text-align: center; }
 
@@ -405,7 +405,7 @@ body {
    by sky phase — dawn/dusk are the purple-orange dips below the
    horizon line, so twilight needs no timestamps of its own */
 
-.sunpath { margin-top: 8px; }
+.sunpath { margin-top: 4px; }
 .sunpath svg { display: block; width: 100%; height: auto; }
 .sp-horizon { stroke: #26324a; stroke-width: 1; }
 .sp-moon { font-size: 14px; text-anchor: middle; }
@@ -417,6 +417,11 @@ body {
 }
 .sp-arrow { font-size: 12px; font-weight: 400; fill: var(--ink-3); }
 .sp-drift { font-size: 12px; font-weight: 400; fill: var(--ink-3); }
+.sp-dur {
+  font-size: 12px;
+  fill: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
 
 /* ── Air quality + pollen (left column) ──────────────────────── */
 
