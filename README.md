@@ -25,13 +25,12 @@ your lock screen. One static page, no build step, no frameworks.
   sunscreen is advised, day/night icons including a composited
   moon-behind-cloud that Unicode forgot to ship.
 - **Sun path**: the day's actual solar elevation curve (NOAA arithmetic,
-  no API) as a wide horizon strip along the bottom — night runs flat,
-  dawn and dusk dip below the line in twilight purple-pink-orange, the
-  day arcs in gold: tall in summer, low and short in winter. A sun dot
-  glides along it (the moon takes over at night, in its current phase),
-  and sunrise/sunset stand at their horizon crossings with the
-  day-to-day drift in minutes (+1′/−1′) — twilight needs no timestamps
-  when you can see it.
+  no API) as a small horizon widget in the weather card — night runs
+  flat, dawn and dusk dip below the line in twilight purple-pink-orange,
+  the day arcs in gold: tall in summer, low and short in winter. A sun
+  dot glides along it (the moon takes over at night, in its current
+  phase), with sunrise/sunset times and their day-to-day drift in
+  minutes (+1′/−1′) — twilight needs no timestamps when you can see it.
 - **Air quality** (Open-Meteo, European AQI): verdict pill plus per-
   pollutant tiles that light up in the band color of whichever pollutant
   is driving a bad index.
