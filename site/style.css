@@ -68,8 +68,8 @@ body {
 }
 
 /* the left column runs full: these three give the sun path its room */
-.weather-card { padding-top: 14px; padding-bottom: 14px; }
-.aqi-card { padding-top: 14px; padding-bottom: 14px; }
+.weather-card { padding-top: 14px; padding-bottom: 10px; }
+.aqi-card { padding-top: 12px; padding-bottom: 12px; }
 .pollen-card { padding-top: 16px; padding-bottom: 14px; }
 
 .clock-card { text-align: center; }
@@ -405,9 +405,8 @@ body {
    by sky phase — dawn/dusk are the purple-orange dips below the
    horizon line, so twilight needs no timestamps of its own */
 
-.sunpath { margin-top: 4px; }
+.sunpath { margin-top: 12px; }
 .sunpath svg { display: block; width: 100%; height: auto; }
-.sp-horizon { stroke: #26324a; stroke-width: 1; }
 .sp-moon { font-size: 14px; text-anchor: middle; }
 .sp-label {
   font-size: 15px;
