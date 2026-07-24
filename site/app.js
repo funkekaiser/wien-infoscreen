@@ -829,14 +829,14 @@ function renderSunPath(now) {
   if (key === lastSunKey) return;
   lastSunKey = key;
 
-  // wide horizon strip: x = the local day 00:00–24:00, y = elevation.
+  // compact horizon widget: x = the local day 00:00–24:00, y = elevation.
   // Above the horizon the curve is to scale; below it the scale is
-  // stretched (~3×) so the twilight dip reads as a real zone, floored
-  // at -13° where the night runs flat.
-  const W = 1338, H = 72, HORIZON = 44, TOP = 8, FLOOR_DEG = -13;
-  const PAD = 6;
+  // stretched so the twilight dip stays visible, floored at -13° where
+  // the night runs flat.
+  const W = 418, H = 58, HORIZON = 38, TOP = 8, FLOOR_DEG = -13;
+  const PAD = 4;
   const upScale = (HORIZON - TOP) / 66;
-  const dnScale = 1.5;
+  const dnScale = 1.1;
   const x = (min) => PAD + (min / 1440) * (W - 2 * PAD);
   const y = (e) => e >= 0 ? HORIZON - e * upScale
     : HORIZON - Math.max(e, FLOOR_DEG) * dnScale;
@@ -860,15 +860,15 @@ function renderSunPath(now) {
   const cx = Math.min(Math.max(x(nowMin), 15), W - 15).toFixed(1);
   const cy = y(eNow).toFixed(1);
   const marker = eNow < -6
-    ? '<text class="sp-moon" x="' + cx + '" y="' + (+cy + 6) + '">' +
+    ? '<text class="sp-moon" x="' + cx + '" y="' + (+cy + 5) + '">' +
       moonPhaseEmoji(now) + "</text>"
-    : '<circle cx="' + cx + '" cy="' + cy + '" r="11" fill="' +
+    : '<circle cx="' + cx + '" cy="' + cy + '" r="8" fill="' +
       rampColor(SUN_STOPS, eNow) + '" opacity="0.25"/>' +
-      '<circle cx="' + cx + '" cy="' + cy + '" r="5.5" fill="' +
+      '<circle cx="' + cx + '" cy="' + cy + '" r="4" fill="' +
       rampColor(SUN_STOPS, eNow) + '"/>';
 
   // sunrise / sunset labels with the day-to-day drift in minutes,
-  // floating in the empty sky beside their horizon crossings
+  // tucked into the empty sky corners above the night ends of the curve
   const fmtHM = (d) => String(d.getHours()).padStart(2, "0") + ":" +
     String(d.getMinutes()).padStart(2, "0");
   const minOfDay = (d) => d.getHours() * 60 + d.getMinutes();
@@ -878,15 +878,15 @@ function renderSunPath(now) {
   if (today && tomorrow) {
     const label = (ev, arrow, anchor) => {
       const drift = minOfDay(tomorrow[ev]) - minOfDay(today[ev]);
-      const lx = x(minOfDay(today[ev])) + (anchor === "end" ? -16 : 16);
-      return '<text class="sp-label" text-anchor="' + anchor + '" x="' +
-        lx.toFixed(0) + '" y="30"><tspan class="sp-arrow">' + arrow +
+      const lx = anchor === "start" ? PAD : W - PAD;
+      return '<text class="sp-label" text-anchor="' + anchor + '" x="' + lx +
+        '" y="14"><tspan class="sp-arrow">' + arrow +
         "</tspan> " + fmtHM(today[ev]) +
         (drift ? '<tspan class="sp-drift"> ' +
           (drift > 0 ? "+" : "−") + Math.abs(drift) + "′</tspan>" : "") +
         "</text>";
     };
-    labels = label("rise", "↑", "end") + label("set", "↓", "start");
+    labels = label("rise", "↑", "start") + label("set", "↓", "end");
   }
 
   $("sunpath").innerHTML =
@@ -902,7 +902,7 @@ function renderSunPath(now) {
     '<path d="' + path + "L" + (W - PAD) + " " + HORIZON + "L" + PAD + " " +
     HORIZON + 'Z" fill="url(#sp-grad)" opacity="0.08" clip-path="url(#sp-sky)"/>' +
     '<path d="' + path + '" fill="none" stroke="url(#sp-grad)" ' +
-    'stroke-width="4" stroke-linecap="round"/>' +
+    'stroke-width="3" stroke-linecap="round"/>' +
     marker + labels +
     "</svg>";
 }

@@ -63,9 +63,14 @@ body {
   display: grid;
   grid-template-rows: auto auto auto 1fr;
   grid-template-columns: minmax(0, 1fr);
-  gap: 20px;
+  gap: 16px;
   min-height: 0;
 }
+
+/* the left column runs full: these three give the sun path its room */
+.weather-card { padding-top: 14px; padding-bottom: 14px; }
+.aqi-card { padding-top: 14px; padding-bottom: 14px; }
+.pollen-card { padding-top: 16px; padding-bottom: 16px; }
 
 .clock-card { text-align: center; }
 
@@ -199,7 +204,7 @@ body {
 
 .col-right {
   display: grid;
-  grid-template-rows: 1fr auto auto auto;
+  grid-template-rows: 1fr auto auto;
   /* explicit minmax(0,1fr) column: the implicit auto track otherwise grows
      to the max-content of nowrap children (disruption banner text) */
   grid-template-columns: minmax(0, 1fr);
@@ -396,22 +401,22 @@ body {
 .dday .d-max { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
 .dday .d-min { font-size: 17px; font-variant-numeric: tabular-nums; }
 
-/* ── Sun path (bottom strip): today's real elevation curve, colored
+/* ── Sun path (weather card): today's real elevation curve, colored
    by sky phase — dawn/dusk are the purple-orange dips below the
    horizon line, so twilight needs no timestamps of its own */
 
-.sun-card { padding: 12px 26px; overflow: hidden; }
+.sunpath { margin-top: 8px; }
 .sunpath svg { display: block; width: 100%; height: auto; }
 .sp-horizon { stroke: #26324a; stroke-width: 1; }
-.sp-moon { font-size: 18px; text-anchor: middle; }
+.sp-moon { font-size: 14px; text-anchor: middle; }
 .sp-label {
-  font-size: 19px;
+  font-size: 15px;
   font-weight: 600;
   fill: var(--ink-2);
   font-variant-numeric: tabular-nums;
 }
-.sp-arrow { font-size: 16px; font-weight: 400; fill: var(--ink-3); }
-.sp-drift { font-size: 16px; font-weight: 400; fill: var(--ink-3); }
+.sp-arrow { font-size: 12px; font-weight: 400; fill: var(--ink-3); }
+.sp-drift { font-size: 12px; font-weight: 400; fill: var(--ink-3); }
 
 /* ── Air quality + pollen (left column) ──────────────────────── */
 
