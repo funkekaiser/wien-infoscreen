@@ -842,14 +842,17 @@ function renderSunPath(now) {
     : HORIZON - Math.max(e, FLOOR_DEG) * dnScale;
   const base = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
 
-  // path + gradient sampled across the local day
+  // path + gradient sampled across the local day; the night line fades
+  // out toward the widget edges (first/last two hours) — midnight is
+  // nothing worth drawing a hard line about
+  const edgeFade = (m) => Math.min(1, m / 120, (1440 - m) / 120).toFixed(2);
   let path = "", stops = "";
   for (let m = 0; m <= 1440; m += 10) {
     const e = sunElevation(new Date(base + m * 60000));
     path += (m ? "L" : "M") + x(m).toFixed(1) + " " + y(e).toFixed(1);
     if (m % 20 === 0) {
       stops += '<stop offset="' + (m / 1440 * 100).toFixed(1) + '%" stop-color="' +
-        rampColor(SUN_STOPS, e) + '"/>';
+        rampColor(SUN_STOPS, e) + '" stop-opacity="' + edgeFade(m) + '"/>';
     }
   }
 
@@ -907,10 +910,17 @@ function renderSunPath(now) {
     '<defs><linearGradient id="sp-grad" gradientUnits="userSpaceOnUse" ' +
     'x1="' + PAD + '" y1="0" x2="' + (W - PAD) + '" y2="0">' + stops +
     "</linearGradient>" +
+    '<linearGradient id="sp-hgrad" gradientUnits="userSpaceOnUse" ' +
+    'x1="' + PAD + '" y1="0" x2="' + (W - PAD) + '" y2="0">' +
+    '<stop offset="0%" stop-color="#26324a" stop-opacity="0"/>' +
+    '<stop offset="8%" stop-color="#26324a"/>' +
+    '<stop offset="92%" stop-color="#26324a"/>' +
+    '<stop offset="100%" stop-color="#26324a" stop-opacity="0"/>' +
+    "</linearGradient>" +
     '<clipPath id="sp-sky"><rect x="0" y="0" width="' + W + '" height="' +
     HORIZON + '"/></clipPath></defs>' +
-    '<line class="sp-horizon" x1="' + PAD + '" y1="' + HORIZON +
-    '" x2="' + (W - PAD) + '" y2="' + HORIZON + '"/>' +
+    '<line stroke="url(#sp-hgrad)" stroke-width="1" x1="' + PAD + '" y1="' +
+    HORIZON + '" x2="' + (W - PAD) + '" y2="' + HORIZON + '"/>' +
     // daylight as a faint warm area under the arc (clipped at the horizon)
     '<path d="' + path + "L" + (W - PAD) + " " + HORIZON + "L" + PAD + " " +
     HORIZON + 'Z" fill="url(#sp-grad)" opacity="0.08" clip-path="url(#sp-sky)"/>' +
