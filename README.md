@@ -5,7 +5,11 @@ traffic-light "can I still catch it?" system, city bikes, weather, air
 quality, personal pollen risk, and a clock that rolls like the one on
 your lock screen. One static page, no build step, no frameworks.
 
-*(screenshot coming)*
+![The infoscreen at midday: departures board with traffic-light timings,
+weather with the sun path, air quality, pollen and the rolling clock](docs/screenshot.png)
+
+*Running the example config (stops around Stephansplatz), Vienna, a July
+afternoon.*
 
 ## What it shows
 
