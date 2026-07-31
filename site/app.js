@@ -359,7 +359,9 @@ function renderWL(monitors) {
         row = {
           order: CONFIG.stops.indexOf(cfg),
           walk: cfg.walk,
-          cutoff: CONFIG.bikeCutoff(cfg.walk),
+          // the whole stop is passed too, so a config can rule the bike
+          // tier out per stop (return walk to collapse it away)
+          cutoff: CONFIG.bikeCutoff(cfg.walk, cfg),
           name: line.name,
           towards,
           type: line.type,

@@ -37,7 +37,11 @@ const CONFIG = {
   bikeRefreshMs: 2 * 60 * 1000,  // GBFS feed TTL is 60 s
 
   // Earliest departure still catchable by grabbing a city bike:
-  // roughly half the walking time works well for 5-8 minute walks
+  // roughly half the walking time works well for 5-8 minute walks.
+  // Also receives the stop entry, so you can rule the bike tier out where
+  // it makes no sense — e.g. in Vienna a bike may ride the U-Bahn but not
+  // a tram or bus. Return `walk` to collapse the tier for that stop:
+  //   bikeCutoff: (walk, stop) => (stop.bike ? Math.round(walk / 2) : walk),
   bikeCutoff: (walk) => Math.round(walk / 2),
 
   // Green means "head out now": max minutes you'd wait AT the stop.
