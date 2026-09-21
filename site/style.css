@@ -588,3 +588,15 @@ body {
 [data-theme="mirror"] .t-min.missed,
 [data-theme="mirror"] .t-min.empty,
 [data-theme="mirror"] .p-chip.grey { font-weight: 500; }
+
+/* Card padding and the gaps between cards are only there to frame the
+   card surfaces, and those surfaces are invisible here. Hand that air
+   to the departures board, which is the thing that runs out of rows. */
+[data-theme="mirror"] body { padding-top: 12px; padding-bottom: 12px; }
+[data-theme="mirror"] .col-right { gap: 8px; }
+[data-theme="mirror"] .transit-card { padding-top: 6px; padding-bottom: 6px; }
+[data-theme="mirror"] .hourly-card { padding-top: 4px; padding-bottom: 4px; }
+[data-theme="mirror"] .hour,
+[data-theme="mirror"] .dday { padding: 6px 4px; }
+[data-theme="mirror"] .hour .h-icon,
+[data-theme="mirror"] .dday .d-icon { margin: 3px 0; }
