@@ -15,6 +15,27 @@
   --good: #6fcf7c;
   --warn: #f2c94c;
   --bad: #eb5757;
+  --horizon: #26324a;
+}
+
+/* Mirror theme: the screen sits behind two-way mirror foil. Only bright
+   pixels make it through the foil, and anything dimmer than about 10%
+   gray just looks like mirror. Everything that isn't information goes
+   pure black: card surfaces, zebra stripes and tinted fills would only
+   show as a hazy rectangle in the glass. The ink and signal colors are
+   pushed to full brightness, because the foil eats most of the light. */
+:root[data-theme="mirror"] {
+  --bg: #000;
+  --card: #000;
+  --card-inset: #000;
+  --line: #3b4250;       /* dividers: barely there, which is right */
+  --ink: #fff;
+  --ink-2: #e4e9f0;
+  --ink-3: #bac4d2;
+  --good: #4dff88;
+  --warn: #ffd23f;
+  --bad: #ff4a4a;
+  --horizon: #5a6680;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -526,3 +547,44 @@ body {
   padding: 8px 16px;
   font-size: 19px;
 }
+
+/* ── Mirror theme overrides ──────────────────────────────────── */
+
+[data-theme="mirror"] .card { border-color: transparent; }
+
+/* Zebra stripes and state fills vanish behind the foil, so text color
+   alone carries the signal. !important is needed because JS sets the
+   temperature, UV, AQI and pollen tints as inline styles. */
+[data-theme="mirror"] .transit .t-row,
+[data-theme="mirror"] .bikes .t-row,
+[data-theme="mirror"] .t-min,
+[data-theme="mirror"] .hour,
+[data-theme="mirror"] .dday,
+[data-theme="mirror"] .uv,
+[data-theme="mirror"] .aqi-band,
+[data-theme="mirror"] .aqi-pollutants div,
+[data-theme="mirror"] .p-chip {
+  background: none !important;
+}
+[data-theme="mirror"] .t-min.bike { color: var(--bad); }
+
+/* the line badges keep their solid fills (they're the anchor the eye
+   finds first), but brighter, or the foil turns them brown-black */
+[data-theme="mirror"] .badge.metro { background: #d68a3a; }
+[data-theme="mirror"] .badge.tram  { background: #f0233f; }
+[data-theme="mirror"] .badge.bus   { background: #2f7fe0; }
+[data-theme="mirror"] .badge.bike  { background: #2a9be6; }
+
+/* with no fill left, a warn outline keeps the alert reading as a banner */
+[data-theme="mirror"] #alerts .alert,
+[data-theme="mirror"] .stale {
+  background: none;
+  border: 2px solid var(--warn);
+}
+[data-theme="mirror"] #alerts .alert span { color: #ffe38a; }
+
+/* the foil also blurs thin strokes, so the text gets a bit more weight */
+[data-theme="mirror"] .t-dest { font-weight: 600; }
+[data-theme="mirror"] .t-min.missed,
+[data-theme="mirror"] .t-min.empty,
+[data-theme="mirror"] .p-chip.grey { font-weight: 500; }
