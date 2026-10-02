@@ -54,6 +54,11 @@ const CONFIG = {
   staleAfterMs: 90 * 1000,       // warn badge when departures data is older
   reloadHour: 4,                 // daily page reload (kiosk hygiene)
 
+  // "dark": the default. "mirror": for a screen behind two-way mirror
+  // foil. Pure black everywhere except the information, which is pushed
+  // to full brightness. Try it first with ?theme=mirror in the URL.
+  theme: "dark",
+
   // "roll": StandBy-style odometer. "phase": in-place diagonal crossfade.
   clockStyle: "roll",
 
