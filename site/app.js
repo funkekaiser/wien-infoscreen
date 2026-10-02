@@ -6,6 +6,10 @@
 
 const $ = (id) => document.getElementById(id);
 
+// Color theme: CONFIG.theme, or ?theme=mirror to preview without editing config
+document.documentElement.dataset.theme =
+  new URLSearchParams(location.search).get("theme") || CONFIG.theme || "dark";
+
 // Odometer roll for the clock: only the digits that change roll over —
 // the old glyph slides up and out while the new one rises into place.
 function setClockDigits(str) {
@@ -914,10 +918,10 @@ function renderSunPath(now) {
     "</linearGradient>" +
     '<linearGradient id="sp-hgrad" gradientUnits="userSpaceOnUse" ' +
     'x1="' + PAD + '" y1="0" x2="' + (W - PAD) + '" y2="0">' +
-    '<stop offset="0%" stop-color="#26324a" stop-opacity="0"/>' +
-    '<stop offset="8%" stop-color="#26324a"/>' +
-    '<stop offset="92%" stop-color="#26324a"/>' +
-    '<stop offset="100%" stop-color="#26324a" stop-opacity="0"/>' +
+    '<stop offset="0%" style="stop-color:var(--horizon)" stop-opacity="0"/>' +
+    '<stop offset="8%" style="stop-color:var(--horizon)"/>' +
+    '<stop offset="92%" style="stop-color:var(--horizon)"/>' +
+    '<stop offset="100%" style="stop-color:var(--horizon)" stop-opacity="0"/>' +
     "</linearGradient>" +
     '<clipPath id="sp-sky"><rect x="0" y="0" width="' + W + '" height="' +
     HORIZON + '"/></clipPath></defs>' +
