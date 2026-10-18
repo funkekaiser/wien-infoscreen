@@ -91,4 +91,4 @@ See `site/config.example.js` for the documented template.
 
 ## License
 
-MIT
+Copyright (C) 2026 Jonathan Funke-Kaiser. Licensed under the GNU General Public License v3.0 or later; see [LICENSE](LICENSE).
